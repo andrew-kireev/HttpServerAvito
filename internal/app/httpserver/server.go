@@ -2,6 +2,7 @@ package httpserver
 
 import (
 	"HttpServerAvito/store"
+	"encoding/json"
 	"fmt"
 	"net/http"
 )
@@ -37,8 +38,18 @@ func (serv *server)ConfigRouter() {
 		w.Write([]byte("Hello"))
 	})
 
-	serv.router.HandleFunc("/bye", func (w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("bye"))
+	serv.router.HandleFunc("/getAll", func (w http.ResponseWriter, r *http.Request) {
+		hotels := serv.store.Hotels().GetHotelsList()
+
+		respone, err := json.Marshal(hotels)
+		if err != nil {
+			fmt.Println("Ошибка паковки json")
+			return
+		}
+
+		fmt.Println(string(respone))
+		w.Write(respone)
+		w.Write([]byte("\nbye"))
 	})
 }
 

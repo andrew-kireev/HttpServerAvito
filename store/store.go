@@ -8,6 +8,7 @@ import (
 type Store struct {
 	config *Config
 	db *sql.DB
+	hotelRep *HotelsRepository
 }
 
 
@@ -33,4 +34,15 @@ func (store *Store) Open() error {
 
 func (store *Store) Close() {
 
+}
+
+func (store *Store) Hotels() *HotelsRepository  {
+	if store.hotelRep != nil {
+		return store.hotelRep
+	}
+
+	store.hotelRep = &HotelsRepository{
+		store: store,
+	}
+	return store.hotelRep
 }
