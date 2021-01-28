@@ -9,7 +9,7 @@ type HotelsRepository struct {
 	store *Store
 }
 
-func (rep *HotelsRepository) Create(h *model.Hotels) (*model.Hotels, error) {
+func (rep *HotelsRepository) AddHotel(h *model.Hotels) (*model.Hotels, error) {
 	if err := rep.store.db.QueryRow(
 		"INSERT INTO hotels (description, cost) VALUES ($1, $2) RETURNING id", h.Description, h.Price,
 		).Scan(&h.Id); err != nil {
@@ -33,4 +33,14 @@ func (rep *HotelsRepository) GetHotelsList() []model.Hotels {
 		hotels = append(hotels, newHotel)
 	}
 	return hotels
+}
+
+func (rep *HotelsRepository) DeleteHotel(id int) error {
+	_, err := rep.store.db.Exec("DELETE from hotels where id= $1", id)
+	if err != nil {
+		fmt.Println("Произошла ошибка в DeleteHotel")
+		return err
+	}
+
+	return nil
 }

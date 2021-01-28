@@ -1,10 +1,12 @@
 package httpserver
 
 import (
+	"HttpServerAvito/internal/model"
 	"HttpServerAvito/store"
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 )
 
 
@@ -29,7 +31,32 @@ func NewServer(config *Config) (*server, error) {
 	return serv, nil
 }
 
-func (serv *server)ConfigRouter() {
+func (serv *server) HandleDeleteHotel(w http.ResponseWriter, r *http.Request) {
+
+	fmt.Println(r.URL)
+	id, err := strconv.Atoi(r.URL.Query().Get("id"))
+	if err != nil {
+		fmt.Println("error in HandleDeleteHotel")
+		w.Write([]byte("Произошла ошибка при удалении"))
+		return
+	}
+	fmt.Println("HandleDeleteHotel")
+
+	err = serv.store.Hotels().DeleteHotel(id)
+	if err != nil {
+		fmt.Println("error in HandleDeleteHotel")
+		w.Write([]byte("Произошла ошибка при удалении"))
+	}
+	w.Write([]byte("Отель успешно удален"))
+}
+
+func (serv *server) HandleAddHotel(w http.ResponseWriter, r *http.Request) {
+	hotel := &model.Hotels{}
+
+	r.
+}
+
+func (serv *server) ConfigRouter() {
 	serv.router.HandleFunc("/", func (w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("default"))
 	})
@@ -37,6 +64,10 @@ func (serv *server)ConfigRouter() {
 	serv.router.HandleFunc("/hello", func (w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Hello"))
 	})
+
+
+	serv.router.HandleFunc("/delete/", serv.HandleDeleteHotel)
+
 
 	serv.router.HandleFunc("/getAll", func (w http.ResponseWriter, r *http.Request) {
 		hotels := serv.store.Hotels().GetHotelsList()
