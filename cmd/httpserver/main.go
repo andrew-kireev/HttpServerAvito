@@ -27,7 +27,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	httpserver.Start(config)
-
-	fmt.Println("hello")
+	err = httpserver.Start(config)
+	if err != nil {
+		fmt.Println("fail start server")
+	}
 }
