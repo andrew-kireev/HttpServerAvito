@@ -20,7 +20,6 @@ func main() {
 	InitConfig()
 	flag.Parse()
 
-
 	config := httpserver.NewConfig()
 	_, err := toml.DecodeFile(configPath, config)
 	if err != nil {

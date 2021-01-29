@@ -6,13 +6,13 @@ import (
 )
 
 type Store struct {
-	config *Config
-	db *sql.DB
-	hotelRep *HotelsRepository
+	config      *Config
+	db          *sql.DB
+	hotelRep    *HotelsRepository
+	bookingsRep *BookingsRepository
 }
 
-
-func NewStore(config *Config) *Store{
+func NewStore(config *Config) *Store {
 	return &Store{
 		config: config,
 	}
@@ -36,7 +36,7 @@ func (store *Store) Close() {
 
 }
 
-func (store *Store) Hotels() *HotelsRepository  {
+func (store *Store) Hotels() *HotelsRepository {
 	if store.hotelRep != nil {
 		return store.hotelRep
 	}
@@ -45,4 +45,15 @@ func (store *Store) Hotels() *HotelsRepository  {
 		store: store,
 	}
 	return store.hotelRep
+}
+
+func (store *Store) Bookings() *BookingsRepository {
+	if store.bookingsRep != nil {
+		return store.bookingsRep
+	}
+
+	store.bookingsRep = &BookingsRepository{
+		store: store,
+	}
+	return store.bookingsRep
 }

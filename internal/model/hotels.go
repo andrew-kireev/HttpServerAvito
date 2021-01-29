@@ -1,7 +1,7 @@
 package model
 
 type Hotels struct {
-	Id          int `json:"id"`
+	Id          int    `json:"id"`
 	Description string `json:"description"`
-	Price       int `json:"price"`
+	Price       int    `json:"price"`
 }

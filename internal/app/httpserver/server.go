@@ -11,7 +11,6 @@ import (
 )
 
 type server struct {
-	//router *mux.Router
 	Conf   *Config
 	router *http.ServeMux
 	store  *store.Store
@@ -75,6 +74,18 @@ func (serv *server) HandleAddHotel(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(response))
 }
 
+func (serv *server) HandlerGerAllBookings(w http.ResponseWriter, r *http.Request) {
+	serv.logger.Info("HandlerGerAllBookings")
+	hotelId, _ := strconv.Atoi(r.FormValue("hotel_id"))
+
+	bookings, err := serv.store.Bookings().GetallBookins(hotelId)
+	if err != nil {
+		serv.logger.Errorf("error in getting all bookings: %v", err)
+	}
+
+	fmt.Println(bookings)
+}
+
 func (serv *server) ConfigRouter() {
 	serv.router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		serv.logger.Info("default handler")
@@ -88,6 +99,7 @@ func (serv *server) ConfigRouter() {
 
 	serv.router.HandleFunc("/delete/", serv.HandleDeleteHotel)
 	serv.router.HandleFunc("/addHotel/", serv.HandleAddHotel)
+	serv.router.HandleFunc("/bookings/list/", serv.HandlerGerAllBookings)
 
 	serv.router.HandleFunc("/getAll", func(w http.ResponseWriter, r *http.Request) {
 		serv.logger.Info("getAll Handler")
