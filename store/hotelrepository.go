@@ -12,18 +12,18 @@ type HotelsRepository struct {
 func (rep *HotelsRepository) AddHotel(h *model.Hotels) (*model.Hotels, error) {
 	if err := rep.store.db.QueryRow(
 		"INSERT INTO hotels (description, cost) VALUES ($1, $2) RETURNING id", h.Description, h.Price,
-		).Scan(&h.Id); err != nil {
-
+	).Scan(&h.Id); err != nil {
 	}
 
-	return nil, nil
+	return h, nil
 }
 
-func (rep *HotelsRepository) GetHotelsList() []model.Hotels {
+func (rep *HotelsRepository) GetHotelsList() ([]model.Hotels, error) {
 	rows, err := rep.store.db.Query("SELECT * FROM hotels")
 	if err != nil {
-		return nil
+		return nil, err
 	}
+	defer rows.Close()
 
 	hotels := make([]model.Hotels, 0)
 	for rows.Next() {
@@ -32,13 +32,12 @@ func (rep *HotelsRepository) GetHotelsList() []model.Hotels {
 		fmt.Println(newHotel)
 		hotels = append(hotels, newHotel)
 	}
-	return hotels
+	return hotels, nil
 }
 
 func (rep *HotelsRepository) DeleteHotel(id int) error {
 	_, err := rep.store.db.Exec("DELETE from hotels where id= $1", id)
 	if err != nil {
-		fmt.Println("Произошла ошибка в DeleteHotel")
 		return err
 	}
 
