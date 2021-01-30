@@ -38,14 +38,37 @@ func NewServer(config *Config) (*server, error) {
 	return serv, nil
 }
 
+func (serv *server) HandleGetAllHotels(w http.ResponseWriter, r *http.Request) {
+	serv.logger.Info("getAll Handler")
+	hotels, err := serv.store.Hotels().GetHotelsList()
+	if err != nil {
+		serv.logger.Errorf("error in get all hotels: %v", err)
+	}
+
+	response, err := json.Marshal(hotels)
+	if err != nil {
+		serv.logger.Errorf("error in marshaling json: %v", err)
+		return
+	}
+
+	serv.logger.Info(string(response))
+	w.Write(response)
+	w.Write([]byte("\nbye"))
+}
+
 func (serv *server) HandleDeleteHotel(w http.ResponseWriter, r *http.Request) {
 	serv.logger.Info("HandleDeleteHotel")
-	fmt.Println(r.URL)
 	id, err := strconv.Atoi(r.FormValue("id"))
 	if err != nil {
 		serv.logger.Errorf("error in HandleDeleteHotel: %v", err)
-		w.Write([]byte("Произошла ошибка при удалении"))
+		w.Write([]byte("{\"result\": \"failed\"}"))
 		return
+	}
+
+	err = serv.store.Bookings().DeleteBookingsByHotelId(id)
+	if err != nil {
+		serv.logger.Errorf("error deleting bookings by hotel id: %v", err)
+		w.Write([]byte("{\"result\": \"failed\"}"))
 	}
 
 	err = serv.store.Hotels().DeleteHotel(id)
@@ -65,11 +88,11 @@ func (serv *server) HandleAddHotel(w http.ResponseWriter, r *http.Request) {
 	hotel, err := serv.store.Hotels().AddHotel(hotel)
 	if err != nil {
 		serv.logger.Errorf("error in adding hotel: %v", err)
-		response:= fmt.Sprintf("{\"hotel_id\": %v}", 0)
+		response := fmt.Sprintf("{\"hotel_id\": %v}", 0)
 		w.Write([]byte(response))
 		return
 	}
-	response:= fmt.Sprintf("{\"hotel_id\": %v}", hotel.Id)
+	response := fmt.Sprintf("{\"hotel_id\": %v}", hotel.Id)
 	fmt.Println(hotel)
 	w.Write([]byte(response))
 }
@@ -78,7 +101,7 @@ func (serv *server) HandlerGetAllBookings(w http.ResponseWriter, r *http.Request
 	serv.logger.Info("HandlerGerAllBookings")
 	hotelId, _ := strconv.Atoi(r.FormValue("hotel_id"))
 
-	bookings, err := serv.store.Bookings().GetallBookins(hotelId)
+	bookings, err := serv.store.Bookings().GetAllBookings(hotelId)
 	if err != nil {
 		serv.logger.Errorf("error in getting all bookings: %v", err)
 	}
@@ -93,38 +116,50 @@ func (serv *server) HandlerGetAllBookings(w http.ResponseWriter, r *http.Request
 	w.Write(response)
 }
 
+func (serv *server) HandlerDeleteBooking(w http.ResponseWriter, r *http.Request) {
+	serv.logger.Info("HandlerDeleteBooking")
+	bookingId, _ := strconv.Atoi(r.FormValue("booking_id"))
+	err := serv.store.Bookings().DeleteBooking(bookingId)
+
+	if err != nil {
+		serv.logger.Errorf("error deleting bookings: %v", err)
+		w.Write([]byte("{\"result\": \"failed\"}"))
+	}
+	w.Write([]byte("{\"result\": \"successful\"}"))
+}
+
+func (serv *server) HandleBookingAdd(w http.ResponseWriter, r *http.Request) {
+	serv.logger.Info("HandleBookingAdd")
+	booking := &model.Bookings{}
+
+	booking.HotelId, _ = strconv.Atoi(r.FormValue("hotel_id"))
+	booking.BeginData = r.FormValue("date_start")
+	booking.EndData = r.FormValue("date_end")
+
+	booking, err := serv.store.Bookings().AddBooking(booking)
+	if err != nil {
+		serv.logger.Errorf("error in adding booking: %v", err)
+		response := fmt.Sprintf("{\"booking_id\": %v}", 0)
+		w.Write([]byte(response))
+		return
+	}
+	response := fmt.Sprintf("{\"booking_id\": %v}", booking.BookingId)
+	fmt.Println(booking)
+	w.Write([]byte(response))
+}
+
 func (serv *server) ConfigRouter() {
 	serv.router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		serv.logger.Info("default handler")
 		w.Write([]byte("default"))
 	})
 
-	serv.router.HandleFunc("/hello", func(w http.ResponseWriter, r *http.Request) {
-		serv.logger.Info("hello handler")
-		w.Write([]byte("Hello"))
-	})
-
-	serv.router.HandleFunc("/delete/", serv.HandleDeleteHotel)
-	serv.router.HandleFunc("/addHotel/", serv.HandleAddHotel)
+	serv.router.HandleFunc("/hotels/list", serv.HandleGetAllHotels)
+	serv.router.HandleFunc("/hotels/delete/", serv.HandleDeleteHotel)
+	serv.router.HandleFunc("/hotels/add", serv.HandleAddHotel)
 	serv.router.HandleFunc("/bookings/list/", serv.HandlerGetAllBookings)
-
-	serv.router.HandleFunc("/getAll", func(w http.ResponseWriter, r *http.Request) {
-		serv.logger.Info("getAll Handler")
-		hotels, err := serv.store.Hotels().GetHotelsList()
-		if err != nil {
-			serv.logger.Errorf("error in get all hotels: %v", err)
-		}
-
-		response, err := json.Marshal(hotels)
-		if err != nil {
-			serv.logger.Errorf("error in marshaling json: %v", err)
-			return
-		}
-
-		serv.logger.Info(string(response))
-		w.Write(response)
-		w.Write([]byte("\nbye"))
-	})
+	serv.router.HandleFunc("/bookings/delete", serv.HandlerDeleteBooking)
+	serv.router.HandleFunc("/bookings/create", serv.HandleBookingAdd)
 }
 
 func (serv *server) ConfigLogger() error {

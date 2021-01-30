@@ -9,7 +9,17 @@ type BookingsRepository struct {
 	store *Store
 }
 
-func (rep *BookingsRepository) GetallBookins(hotelId int) ([]model.Bookings, error){
+func (rep *BookingsRepository) AddBooking(booking *model.Bookings) (*model.Bookings, error) {
+	if err := rep.store.db.QueryRow(
+		"INSERT INTO bookings (hotel_id, begin_data, end_date) VALUES ($1, $2, $3) RETURNING booking_id",
+		booking.HotelId, booking.BeginData, booking.EndData,
+	).Scan(&booking.BookingId); err != nil {
+	}
+
+	return booking, nil
+}
+
+func (rep *BookingsRepository) GetAllBookings(hotelId int) ([]model.Bookings, error) {
 	rows, err := rep.store.db.Query("SELECT * FROM bookings where hotel_id = $1 ORDER BY begin_data", hotelId)
 	if err != nil {
 		return nil, err
@@ -25,4 +35,21 @@ func (rep *BookingsRepository) GetallBookins(hotelId int) ([]model.Bookings, err
 		bookings = append(bookings, newBooking)
 	}
 	return bookings, nil
+}
+
+func (rep *BookingsRepository) DeleteBooking(bookingId int) error {
+	_, err := rep.store.db.Exec("DELETE from bookings where booking_id = $1", bookingId)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (rep *BookingsRepository) DeleteBookingsByHotelId(hotelId int) error {
+	_, err := rep.store.db.Exec("DELETE from bookings where hotel_id = $1", hotelId)
+	if err != nil {
+		return err
+	}
+	return nil
 }
