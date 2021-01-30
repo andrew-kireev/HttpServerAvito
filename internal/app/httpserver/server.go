@@ -74,7 +74,7 @@ func (serv *server) HandleAddHotel(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(response))
 }
 
-func (serv *server) HandlerGerAllBookings(w http.ResponseWriter, r *http.Request) {
+func (serv *server) HandlerGetAllBookings(w http.ResponseWriter, r *http.Request) {
 	serv.logger.Info("HandlerGerAllBookings")
 	hotelId, _ := strconv.Atoi(r.FormValue("hotel_id"))
 
@@ -83,7 +83,14 @@ func (serv *server) HandlerGerAllBookings(w http.ResponseWriter, r *http.Request
 		serv.logger.Errorf("error in getting all bookings: %v", err)
 	}
 
-	fmt.Println(bookings)
+	response, err := json.Marshal(bookings)
+	if err != nil {
+		serv.logger.Errorf("error in marshaling json: %v", err)
+		return
+	}
+
+	serv.logger.Info(string(response))
+	w.Write(response)
 }
 
 func (serv *server) ConfigRouter() {
@@ -99,7 +106,7 @@ func (serv *server) ConfigRouter() {
 
 	serv.router.HandleFunc("/delete/", serv.HandleDeleteHotel)
 	serv.router.HandleFunc("/addHotel/", serv.HandleAddHotel)
-	serv.router.HandleFunc("/bookings/list/", serv.HandlerGerAllBookings)
+	serv.router.HandleFunc("/bookings/list/", serv.HandlerGetAllBookings)
 
 	serv.router.HandleFunc("/getAll", func(w http.ResponseWriter, r *http.Request) {
 		serv.logger.Info("getAll Handler")
