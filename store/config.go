@@ -6,6 +6,6 @@ type Config struct {
 
 func NewConfig() *Config{
 	return &Config{
-		DataBaseUrl: "host=localhost dbname=avito_httpserv sslmode=disable",
+		DataBaseUrl: "host=database port=5432 user=postgres dbname=avito_httpserv password=password sslmode=disable",
 	}
 }

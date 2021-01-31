@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/BurntSushi/toml"
 	"log"
+	"time"
 )
 
 var (
@@ -17,6 +18,8 @@ func InitConfig() {
 }
 
 func main() {
+	fmt.Println("точка входа")
+	time.Sleep(time.Second * 5)
 	InitConfig()
 	flag.Parse()
 
@@ -26,6 +29,7 @@ func main() {
 		log.Fatal(err)
 	}
 
+	fmt.Println("перед стартом")
 	err = httpserver.Start(config)
 	if err != nil {
 		fmt.Println("fail start server")

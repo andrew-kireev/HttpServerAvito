@@ -53,7 +53,6 @@ func (serv *server) HandleGetAllHotels(w http.ResponseWriter, r *http.Request) {
 
 	serv.logger.Info(string(response))
 	w.Write(response)
-	w.Write([]byte("\nbye"))
 }
 
 func (serv *server) HandleDeleteHotel(w http.ResponseWriter, r *http.Request) {
@@ -156,7 +155,7 @@ func (serv *server) ConfigRouter() {
 
 	serv.router.HandleFunc("/hotels/list", serv.HandleGetAllHotels)
 	serv.router.HandleFunc("/hotels/delete/", serv.HandleDeleteHotel)
-	serv.router.HandleFunc("/hotels/add", serv.HandleAddHotel)
+	serv.router.HandleFunc("/hotels/create", serv.HandleAddHotel)
 	serv.router.HandleFunc("/bookings/list/", serv.HandlerGetAllBookings)
 	serv.router.HandleFunc("/bookings/delete", serv.HandlerDeleteBooking)
 	serv.router.HandleFunc("/bookings/create", serv.HandleBookingAdd)
@@ -186,6 +185,7 @@ func (serv *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (serv *server) ConfigStore() error {
+	serv.logger.Info(serv.Conf.StoreConfig.DataBaseUrl)
 	st := store.NewStore(serv.Conf.StoreConfig)
 
 	if err := st.Open(); err != nil {
