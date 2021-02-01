@@ -28,13 +28,18 @@ docker-compose up
     - price - цена за ночь
     
 - Параметры ответа:
-    - hotel_id - id созданного номера
+    - room_id - id созданного номера
     
 Запрос:
 
 ```
-curl -X POST -d "description=some description” -d "price=10000" 
- http://localhost:9000/hotels/create
+curl -X POST -d "description=some description"
+-d "price=10000" http://localhost:8080/hotels/create
+```
+
+Ответ:
+```
+{"room_id": 5}
 ```
 
 ### Удалить номер отеля и все его брони
@@ -43,16 +48,101 @@ curl -X POST -d "description=some description” -d "price=10000"
     - id - Принимает на вход ID номера отеля.
 
 - Параметры ответа:
-    - hotel_id - id созданного номера
+    - возвращает результат удаления: successful/failed
 
 Запрос:
 
 ```
-curl -X POST -d "description=some description” -d "price=10000" 
- http://localhost:9000/hotels/create
+curl -X POST -d "id=5" http://localhost:8080/hotels/delete
 ```
 
+Ответ:
+```
+{"result": "successful"}
+```
 
+### Получить список номеров отеля
 
+- Параметры ответа:
+  - Должна быть возможность отсортировать по цене
+    или по дате добавления (по возрастанию и убыванию).
+
+Запрос:
+
+```
+ curl -X GET http://localhost:8080/hotels/list
+```
+
+Ответ:
+```
+[{"id":1,"description":"\"best\"","price":5000},
+{"id":2,"description":"\"worst\"","price":100},
+{"id":3,"description":"\"normal\"","price":4000}]
+```
+
+## Работа с бронями:
+
+### Добавить бронь
+
+- Параметры запроса:
+  - hotel_id - ID номера отеля
+  - date_start - дата начала бронирования
+  - date_end - дата окончания брони
+
+- Параметры ответа:
+  - booking_id - id созданной брони
+
+Запрос:
+
+```
+curl -X POST -d "room_id=10" -d "date_start=2021-12-30"
+-d "date_end=2022-01-02" http://localhost:8080/bookings/create
+```
+
+Ответ:
+```
+{"booking_id": 4}
+```
+
+### Удалить бронь
+
+- Параметры запроса:
+  - booking_id - ID брони
+
+- Параметры ответа:
+  - возвращает результат удаления: successful/failed
+
+Запрос:
+
+```
+curl -X POST -d "booking_id=5" http://localhost:8080/bookings/delete
+```
+
+Ответ:
+```
+{"result": "successful"}
+```
+
+### Получить список броней номера отеля
+
+- Параметры запроса:
+  - room_id - ID номера отеля
+
+- Параметры ответа:
+  - Возвращает список бронирований, каждое бронирование содержит ID, дату начала, дату окончания.
+    Бронирования отсортированы по дате начала.
+
+Запрос:
+
+```
+curl -X GET "http://localhost:8080/bookings/list?room_id=10"
+```
+
+Ответ:
+```
+[{"booking_id":4,"hotel_id":10,"begin_date":"2021-12-30","end_date":"2022-01-02"},
+{"booking_id":6,"hotel_id":10,"begin_date":"2021-12-30","end_date":"2022-01-02"},
+{"booking_id":7,"hotel_id":10,"begin_date":"2021-12-30","end_date":"2022-01-02"}]
+```
 
 

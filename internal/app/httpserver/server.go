@@ -86,19 +86,19 @@ func (serv *server) HandleAddHotel(w http.ResponseWriter, r *http.Request) {
 	hotel.Price, _ = strconv.Atoi(r.FormValue("price"))
 	hotel, err := serv.store.Hotels().AddHotel(hotel)
 	if err != nil {
-		serv.logger.Errorf("error in adding hotel: %v", err)
-		response := fmt.Sprintf("{\"hotel_id\": %v}", 0)
+		serv.logger.Errorf("error in adding hotel room: %v", err)
+		response := fmt.Sprintf("{\"room_id\": %v}", 0)
 		w.Write([]byte(response))
 		return
 	}
-	response := fmt.Sprintf("{\"hotel_id\": %v}", hotel.Id)
+	response := fmt.Sprintf("{\"room_id\": %v}", hotel.Id)
 	fmt.Println(hotel)
 	w.Write([]byte(response))
 }
 
 func (serv *server) HandlerGetAllBookings(w http.ResponseWriter, r *http.Request) {
 	serv.logger.Info("HandlerGerAllBookings")
-	hotelId, _ := strconv.Atoi(r.FormValue("hotel_id"))
+	hotelId, _ := strconv.Atoi(r.FormValue("room_id"))
 
 	bookings, err := serv.store.Bookings().GetAllBookings(hotelId)
 	if err != nil {
@@ -131,7 +131,7 @@ func (serv *server) HandleBookingAdd(w http.ResponseWriter, r *http.Request) {
 	serv.logger.Info("HandleBookingAdd")
 	booking := &model.Bookings{}
 
-	booking.HotelId, _ = strconv.Atoi(r.FormValue("hotel_id"))
+	booking.HotelId, _ = strconv.Atoi(r.FormValue("room_id"))
 	booking.BeginData = r.FormValue("date_start")
 	booking.EndData = r.FormValue("date_end")
 
@@ -154,9 +154,9 @@ func (serv *server) ConfigRouter() {
 	})
 
 	serv.router.HandleFunc("/hotels/list", serv.HandleGetAllHotels)
-	serv.router.HandleFunc("/hotels/delete/", serv.HandleDeleteHotel)
+	serv.router.HandleFunc("/hotels/delete", serv.HandleDeleteHotel)
 	serv.router.HandleFunc("/hotels/create", serv.HandleAddHotel)
-	serv.router.HandleFunc("/bookings/list/", serv.HandlerGetAllBookings)
+	serv.router.HandleFunc("/bookings/list", serv.HandlerGetAllBookings)
 	serv.router.HandleFunc("/bookings/delete", serv.HandlerDeleteBooking)
 	serv.router.HandleFunc("/bookings/create", serv.HandleBookingAdd)
 }
