@@ -33,7 +33,7 @@ docker-compose up
 Запрос:
 
 ```
-curl -X POST -d "description=some description"
+curl -X POST -d "description=some description" \
 -d "price=10000" http://localhost:8080/hotels/create
 ```
 
@@ -63,6 +63,11 @@ curl -X POST -d "id=5" http://localhost:8080/hotels/delete
 
 ### Получить список номеров отеля
 
+- Параметры запроса:
+  - sort - Принимает на вход параметр, ко которому должна производится сортировка: 
+  price - для сортировки по цене, date для сортировки по дате создания.
+    Для сортировки в обратном порядке нужно добавить "-" перед параметром price/date
+
 - Параметры ответа:
   - Должна быть возможность отсортировать по цене
     или по дате добавления (по возрастанию и убыванию).
@@ -70,7 +75,7 @@ curl -X POST -d "id=5" http://localhost:8080/hotels/delete
 Запрос:
 
 ```
- curl -X GET http://localhost:8080/hotels/list
+curl -X GET "http://localhost:8080/hotels/list?sort=-price"
 ```
 
 Ответ:
@@ -95,7 +100,7 @@ curl -X POST -d "id=5" http://localhost:8080/hotels/delete
 Запрос:
 
 ```
-curl -X POST -d "room_id=10" -d "date_start=2021-12-30"
+curl -X POST -d "room_id=10" -d "date_start=2021-12-30" \
 -d "date_end=2022-01-02" http://localhost:8080/bookings/create
 ```
 

@@ -1,4 +1,5 @@
 bind_addr = ":8080"
 
 [store]
-database_url = "host=database port=5432 user=postgres dbname=avito_httpserv password=password sslmode=disable"
+database_url = "host=localhost dbname=avito_httpserv sslmode=disable"
+#database_url = "host=database port=5432 user=postgres dbname=avito_httpserv password=password sslmode=disable"

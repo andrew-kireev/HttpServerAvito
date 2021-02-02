@@ -5,7 +5,7 @@ import "HttpServerAvito/store"
 type Config struct {
 	BindAddr    string        `toml:"bind_addr"`
 	LogLevel    string        `toml:"log_level"`
-	StoreConfig *store.Config ``
+	StoreConfig *store.Config `toml:"store"`
 }
 
 func NewConfig() *Config {

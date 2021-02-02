@@ -40,7 +40,8 @@ func NewServer(config *Config) (*server, error) {
 
 func (serv *server) HandleGetAllHotels(w http.ResponseWriter, r *http.Request) {
 	serv.logger.Info("getAll Handler")
-	hotels, err := serv.store.Hotels().GetHotelsList()
+	sort := r.URL.Query().Get("sort")
+	hotels, err := serv.store.Hotels().GetHotelsList(sort)
 	if err != nil {
 		serv.logger.Errorf("error in get all hotels: %v", err)
 	}

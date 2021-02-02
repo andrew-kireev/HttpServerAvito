@@ -2,6 +2,8 @@ package store
 
 import (
 	"HttpServerAvito/internal/model"
+	"database/sql"
+	"errors"
 	"fmt"
 )
 
@@ -18,8 +20,20 @@ func (rep *HotelsRepository) AddHotel(h *model.Hotels) (*model.Hotels, error) {
 	return h, nil
 }
 
-func (rep *HotelsRepository) GetHotelsList() ([]model.Hotels, error) {
-	rows, err := rep.store.db.Query("SELECT * FROM hotels")
+func (rep *HotelsRepository) GetHotelsList(sort string) ([]model.Hotels, error) {
+	var rows *sql.Rows
+	var err error
+	if sort == "date" {
+		rows, err = rep.store.db.Query("SELECT * FROM hotels order by creation_date")
+	} else if sort == "-date" {
+		rows, err = rep.store.db.Query("SELECT * FROM hotels order by creation_date desc")
+	} else if sort == "price" {
+		rows, err = rep.store.db.Query("SELECT * FROM hotels order by cost")
+	} else if sort == "-price" {
+		rows, err = rep.store.db.Query("SELECT * FROM hotels order by cost desc")
+	} else {
+		return nil, errors.New("not incorrect sorting param")
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -28,7 +42,7 @@ func (rep *HotelsRepository) GetHotelsList() ([]model.Hotels, error) {
 	hotels := make([]model.Hotels, 0)
 	for rows.Next() {
 		newHotel := model.Hotels{}
-		err = rows.Scan(&newHotel.Id, &newHotel.Description, &newHotel.Price)
+		err = rows.Scan(&newHotel.Id, &newHotel.Description, &newHotel.Price, &newHotel.CreationDate)
 		fmt.Println(newHotel)
 		hotels = append(hotels, newHotel)
 	}
